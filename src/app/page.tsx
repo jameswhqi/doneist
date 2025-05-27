@@ -1,13 +1,11 @@
 import prisma from '@/lib/prisma';
+import { formatDate } from '@/lib/utils';
+import DraggableDate from '@/ui/draggable-date';
 
 export default async function Home() {
   const projects = await prisma.project.findMany({ include: { tasks: true } });
 
   const today = new Date();
-
-  function formatDate(date: Date) {
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  }
 
   return (
     <main>
@@ -19,7 +17,9 @@ export default async function Home() {
             <ul>
               {p.tasks.map(t => (
                 <li key={t.id} className='flex gap-2'>
-                  <div className='w-10 text-right'>{t.date && formatDate(t.date)}</div>
+                  <div className='w-10 text-right'>
+                    {t.date && <DraggableDate initDate={t.date} taskId={t.id} />}
+                  </div>
                   <div>{t.title}</div>
                 </li>
               ))}
