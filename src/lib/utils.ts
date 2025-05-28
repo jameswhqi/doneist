@@ -1,3 +1,5 @@
+import { Prisma } from '@/prisma/client';
+
 export function formatDate(date: Date) {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }
@@ -20,3 +22,5 @@ export function formatUTCDateISO(date: Date) {
 export function assertNotNull<T>(x: T | null, label: string): asserts x is T {
   if (x === null) throw new Error(label + ' should not be null');
 }
+
+export type ProjectWithPosts = Prisma.ProjectGetPayload<{ include: { tasks: true; }; }>;

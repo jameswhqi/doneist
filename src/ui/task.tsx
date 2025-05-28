@@ -2,7 +2,7 @@
 
 import { saveDate } from '@/lib/actions';
 import { assertNotNull, formatDateISO, formatUTCDate, formatUTCDateISO } from '@/lib/utils';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, RefObject } from 'react';
 import { Task as PTask } from '@/prisma/client';
 import clsx from 'clsx';
 import { ChevronUpDownIcon } from '@heroicons/react/24/outline';
@@ -10,14 +10,16 @@ import { ChevronUpDownIcon } from '@heroicons/react/24/outline';
 type Props = {
   task: PTask;
   today: Date;
+  dragging: RefObject<boolean>;
 };
 
-export default function Task({ task, today }: Props) {
+export default function Task({ task, today, dragging }: Props) {
   const [date, setDate] = useState(task.date);
+  const [showHandle, setShowHandle] = useState(false);
   const oldDate = useRef(date);
   const newDate = useRef(date);
-  const dragging = useRef(false);
   const startY = useRef(0);
+  const containerRef = useRef<HTMLLIElement>(null);
 
   useEffect(() => {
     newDate.current = date;
@@ -46,8 +48,14 @@ export default function Task({ task, today }: Props) {
     }
   }
 
-  async function handleMouseUp() {
+  async function handleMouseUp(e: MouseEvent) {
     dragging.current = false;
+
+    const elementUnderCursor = document.elementFromPoint(e.clientX, e.clientY);
+    if (!containerRef.current?.contains(elementUnderCursor)) {
+      setShowHandle(false);
+    }
+
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
 
@@ -72,12 +80,17 @@ export default function Task({ task, today }: Props) {
   );
 
   return (
-    <li className='flex gap-2 items-center'>
+    <li
+      ref={containerRef}
+      className='flex gap-2 items-center'
+      onMouseEnter={() => !dragging.current && setShowHandle(true)}
+      onMouseLeave={() => !dragging.current && setShowHandle(false)}
+    >
       <div className='size-5'>
         {date &&
           <ChevronUpDownIcon
             onMouseDown={handleMouseDown}
-            className='select-none cursor-ns-resize'
+            className={clsx('select-none cursor-ns-resize', !showHandle && 'invisible')}
           />
         }
       </div>
