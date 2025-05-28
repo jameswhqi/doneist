@@ -16,3 +16,7 @@ export function formatDateISO(date: Date) {
 export function formatUTCDateISO(date: Date) {
   return date.toISOString().split('T')[0];
 }
+
+export function assertNotNull<T>(x: T | null, label: string): asserts x is T {
+  if (x === null) throw new Error(label + ' should not be null');
+}
