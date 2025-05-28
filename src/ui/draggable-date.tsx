@@ -13,12 +13,13 @@ type Props = {
 
 export default function DraggableDate({ initDate, taskId }: Props) {
   const [date, setDate] = useState(initDate);
-  const dateRef = useRef(date);
+  const oldDate = useRef(date);
+  const newDate = useRef(date);
   const dragging = useRef(false);
   const startY = useRef(0);
 
   useEffect(() => {
-    dateRef.current = date;
+    newDate.current = date;
   }, [date]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -46,10 +47,14 @@ export default function DraggableDate({ initDate, taskId }: Props) {
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
 
-    try {
-      await saveDate(dateRef.current, taskId);
-    } catch (error) {
-      console.error('Failed to save date:', error);
+    if (newDate.current.getTime() !== oldDate.current.getTime()) {
+      oldDate.current = newDate.current;
+      try {
+        console.log('saving');
+        await saveDate(newDate.current, taskId);
+      } catch (error) {
+        console.error('Failed to save date:', error);
+      }
     }
   };
 
