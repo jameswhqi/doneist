@@ -5,6 +5,7 @@ import { assertNotNull, formatDateISO, formatUTCDate, formatUTCDateISO } from '@
 import { useState, useRef, useEffect } from 'react';
 import { Task as PTask } from '@/prisma/client';
 import clsx from 'clsx';
+import { ChevronUpDownIcon } from '@heroicons/react/24/outline';
 
 type Props = {
   task: PTask;
@@ -55,7 +56,6 @@ export default function Task({ task, today }: Props) {
     if (newDate.current.getTime() !== oldDate.current.getTime()) {
       oldDate.current = newDate.current;
       try {
-        console.log('saving');
         await saveDate(newDate.current, task.id);
       } catch (error) {
         console.error('Failed to save date:', error);
@@ -72,15 +72,19 @@ export default function Task({ task, today }: Props) {
   );
 
   return (
-    <li className={clsx('flex gap-2', taskColor)}>
-      <div onMouseDown={handleMouseDown} className='w-10 text-right'>
+    <li className='flex gap-2 items-center'>
+      <div className='size-5'>
         {date &&
-          <div className={clsx('select-none', date && 'cursor-ns-resize')} >
-            {formatUTCDate(date)}
-          </div>
+          <ChevronUpDownIcon
+            onMouseDown={handleMouseDown}
+            className='select-none cursor-ns-resize'
+          />
         }
       </div>
-      <div>{task.title}</div>
+      <div className={clsx('w-10 text-right', taskColor)}>
+        {date && formatUTCDate(date)}
+      </div>
+      <div className={clsx(taskColor)}>{task.title}</div>
     </li>
   );
 }

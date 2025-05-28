@@ -12,6 +12,7 @@
     "studio": "prisma studio"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@prisma/client": "6.8.2",
     "clsx": "^2.1.1",
     "next": "15.3.1",
