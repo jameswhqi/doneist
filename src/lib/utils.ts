@@ -1,11 +1,12 @@
 import { Prisma } from '@/prisma/client';
+import { char, coroutine, digits, optionalWhitespace } from 'arcsecond';
 
-export function formatDate(date: Date) {
-  return `${date.getMonth() + 1}/${date.getDate()}`;
+export function formatDate(date: Date | null) {
+  return date ? `${date.getMonth() + 1}/${date.getDate()}` : '';
 }
 
-export function formatUTCDate(date: Date) {
-  return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
+export function formatUTCDate(date: Date | null) {
+  return date ? `${date.getUTCMonth() + 1}/${date.getUTCDate()}` : '';
 }
 
 export function formatDateISO(date: Date) {
@@ -24,3 +25,28 @@ export function assertNotNull<T>(x: T | null, label: string): asserts x is T {
 }
 
 export type ProjectWithPosts = Prisma.ProjectGetPayload<{ include: { tasks: true; }; }>;
+
+export const dateParser = coroutine(run => {
+  run(optionalWhitespace);
+  const month = run(digits.map(Number));
+  run(optionalWhitespace);
+  run(char('/'));
+  run(optionalWhitespace);
+  const day = run(digits.map(Number));
+  run(optionalWhitespace);
+
+  return { month, day };
+});
+
+export function validateUTCDate(year: number, month: number, day: number) {
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  ) {
+    return date;
+  } else {
+    throw Error('date out of bounds');
+  };
+}
